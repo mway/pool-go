@@ -21,6 +21,7 @@
 package pool_test
 
 import (
+	"runtime"
 	"strconv"
 	"sync"
 	"testing"
@@ -38,8 +39,8 @@ type pooledObject struct {
 
 func newPooledObject() *pooledObject {
 	return &pooledObject{
-		a: make([]byte, 0, 128),
-		b: strconv.Itoa(int(time.Now().UnixNano())),
+		a: []byte("hello"),
+		b: "world",
 		c: true,
 	}
 }
@@ -53,18 +54,25 @@ func releasePooledObject(o *pooledObject) {
 func TestPool(t *testing.T) {
 	var (
 		pool    = pool.New(newPooledObject)
-		expectB = "hello, world!"
-		expectA = []byte(expectB)
-		expectC = true
+		tmp     = newPooledObject()
+		expectA = tmp.a
+		expectB = tmp.b
+		expectC = tmp.c
 	)
 
-	ob := pool.Get()
-	ob.a = expectA
-	ob.b = expectB
-	ob.c = expectC
-	pool.Put(ob)
+	for i := 0; i < 10; i++ {
+		ob := pool.Get()
+		ob.a = nil
+		ob.b = ""
+		ob.c = false
+		pool.Put(ob)
+	}
 
-	ob = pool.Get()
+	for i := 0; i < 10; i++ {
+		runtime.GC()
+	}
+
+	ob := pool.Get()
 	require.Equal(t, expectA, ob.a, "expected object not de-pooled")
 	require.Equal(t, expectB, ob.b, "expected object not de-pooled")
 	require.Equal(t, expectC, ob.c, "expected object not de-pooled")
