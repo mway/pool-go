@@ -23,3 +23,7 @@ jobs:
 
     - name: Test
       run: go test -v -race ./...
+      
+    - name: Coverage
+      uses: codecov/codecov-action@v3.0.0
+
