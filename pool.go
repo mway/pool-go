@@ -46,8 +46,8 @@ type Pool[T any] struct {
 
 // New creates a new Pool compatible with objects of type T with the given
 // Constructor for T.
-func New[T any](ctor Constructor[T]) Pool[T] {
-	return Pool[T]{
+func New[T any](ctor Constructor[T]) *Pool[T] {
+	return &Pool[T]{
 		pool: sync.Pool{
 			New: func() any {
 				return ctor()
@@ -56,9 +56,9 @@ func New[T any](ctor Constructor[T]) Pool[T] {
 	}
 }
 
-// New creates a new Pool compatible with objects of type T with the given
-// Constructor and Releaser for T.
-func NewWithReleaser[T any](ctor Constructor[T], release Releaser[T]) Pool[T] {
+// NewWithReleaser creates a new Pool compatible with objects of type T with
+// the given Constructor and Releaser for T.
+func NewWithReleaser[T any](ctor Constructor[T], release Releaser[T]) *Pool[T] {
 	pool := New(ctor)
 	pool.release = release
 	return pool
