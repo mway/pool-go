@@ -18,6 +18,8 @@
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 // IN THE THE SOFTWARE.
 
+//go:build !race
+
 package pool_test
 
 import (
@@ -64,4 +66,24 @@ func BenchmarkPool(b *testing.B) {
 			}
 		})
 	})
+}
+
+type pooledObject struct {
+	a []byte
+	b string
+	c bool
+}
+
+func newPooledObject() *pooledObject {
+	return &pooledObject{
+		a: []byte("hello"),
+		b: "world",
+		c: true,
+	}
+}
+
+func releasePooledObject(o *pooledObject) {
+	o.a = o.a[:0]
+	o.b = ""
+	o.c = false
 }

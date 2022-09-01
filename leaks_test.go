@@ -18,57 +18,14 @@
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 // IN THE THE SOFTWARE.
 
-//go:build !race
-
 package pool_test
 
 import (
-	"bytes"
-	"runtime/debug"
 	"testing"
 
-	"github.com/stretchr/testify/require"
-	"go.mway.dev/pool"
+	"go.uber.org/goleak"
 )
 
-func TestPool_Constructor(t *testing.T) {
-	defer debug.SetGCPercent(debug.SetGCPercent(-1))
-
-	p := pool.New(func() *bytes.Buffer {
-		return bytes.NewBuffer([]byte(t.Name()))
-	})
-
-	for i := 0; i < 1_000; i++ {
-		func() {
-			buf := p.Get()
-			defer p.Put(buf)
-			require.Equal(t, t.Name(), buf.String())
-		}()
-	}
-}
-
-func TestPool_Releaser(t *testing.T) {
-	defer debug.SetGCPercent(debug.SetGCPercent(-1))
-
-	p := pool.NewWithReleaser(
-		func() *bytes.Buffer {
-			return bytes.NewBuffer([]byte(t.Name()))
-		},
-		func(x *bytes.Buffer) {
-			x.Reset()
-		},
-	)
-
-	tmp := make([]*bytes.Buffer, 1_000)
-	for i := 0; i < len(tmp); i++ {
-		tmp[i] = p.Get()
-	}
-	for i := 0; i < len(tmp); i++ {
-		p.Put(tmp[i])
-	}
-
-	for i := 0; i < 1_000; i++ {
-		buf := p.Get()
-		require.Equal(t, 0, buf.Len(), buf.String())
-	}
+func TestMain(m *testing.M) {
+	goleak.VerifyTestMain(m)
 }
