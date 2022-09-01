@@ -21,4 +21,4 @@
 package pool
 
 // Version is the current version of the library.
-const Version = "v0.1.1-dev"
+const Version = "v0.1.1"
