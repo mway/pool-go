@@ -69,21 +69,21 @@ func BenchmarkPool(b *testing.B) {
 }
 
 type pooledObject struct {
-	a []byte
-	b string
+	a string
+	b []byte
 	c bool
 }
 
 func newPooledObject() *pooledObject {
 	return &pooledObject{
-		a: []byte("hello"),
-		b: "world",
+		a: "world",
+		b: []byte("hello"),
 		c: true,
 	}
 }
 
 func releasePooledObject(o *pooledObject) {
-	o.a = o.a[:0]
-	o.b = ""
+	o.a = ""
+	o.b = o.b[:0]
 	o.c = false
 }
